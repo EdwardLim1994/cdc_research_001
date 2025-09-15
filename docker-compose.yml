@@ -1,0 +1,116 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      CLUSTER_ID: "q1Sh-6xeT1el6Ghiu7VO9A"
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    command:
+      - bash
+      - -c
+      - |
+        if [ ! -f /tmp/kraft-combined-logs/meta.properties ]; then
+          echo "Formatting storage directory..."
+          kafka-storage format \
+            --ignore-formatted \
+            --cluster-id=q1Sh-6xeT1el6Ghiu7VO9A \
+            --config <(echo "
+              node.id=1
+              process.roles=broker,controller
+              listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+              advertised.listeners=PLAINTEXT://kafka:9092
+              controller.listener.names=CONTROLLER
+              inter.broker.listener.name=PLAINTEXT
+              listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+              controller.quorum.voters=1@kafka:9093
+              log.dirs=/tmp/kraft-combined-logs
+            ")
+        fi
+        /etc/confluent/docker/run
+    networks:
+      - local
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - 8888:8080
+    restart: unless-stopped
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+    depends_on:
+      - kafka
+    networks:
+      - local
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+      MYSQL_DATABASE: appdb
+    command: --default-authentication-plugin=mysql_native_password
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --server-id=1
+      --binlog-row-image=FULL
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - local
+
+  debezium:
+    image: debezium/connect:3.0.0.Final
+    container_name: debezium
+    ports:
+      - 8083:8083
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: debezium_connect_configs
+      OFFSET_STORAGE_TOPIC: debezium_connect_offsets
+      STATUS_STORAGE_TOPIC: debezium_connect_statuses
+    depends_on:
+      - kafka
+      - mysql
+    networks:
+      - local
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - 8800:8080
+    networks:
+      - local
+
+volumes:
+  kafka:
+  mysql:
+networks:
+  local:
+    driver: bridge

@@ -1,0 +1,21 @@
+{
+  "name": "learning1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev"
+  },
+  "workspaces": [
+    "services/*"
+  ],
+  "packageManager": "bun@1.21.0",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "turbo": "^2.5.6"
+  }
+}
