@@ -1,15 +1,23 @@
-# learning1
+#### Curl to setup MYSQL connector
 
-To install dependencies:
-
-```bash
-bun install
 ```
-
-To run:
-
-```bash
-bun run index.ts
+curl -X POST http://localhost:8083/connectors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "mysql-connector",
+    "config": {
+      "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+      "tasks.max": "1",
+      "database.hostname": "mysql",
+      "database.port": "3306",
+      "database.user": "app",
+      "database.password": "app",
+      "database.server.id": "184054",
+      "topic.prefix": "mysqlserver",
+      "database.include.list": "appdb",
+      "include.schema.changes": "true",
+      "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+      "schema.history.internal.kafka.topic": "schema-changes.appdb"
+    }
+  }'
 ```
-
-This project was created using `bun init` in bun v1.2.21. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
