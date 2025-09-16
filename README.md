@@ -1,4 +1,19 @@
-#### Curl to setup MYSQL connector
+# CDC Research using Kafka Connect & Debezium
+
+## Purpose
+
+To explore Change Data Capture (CDC) using Kafka Connect and Debezium with a MySQL database. By consuming message published by Debezium, the data cahnged will create, update and delete index in Meilisearch
+
+## Software used
+
+- Debezium
+- Apache Kafka
+- Mysql
+- Meilisearch
+
+## Prerequisite
+
+### Curl to setup MYSQL connector
 
 ```
 curl -X POST http://localhost:8083/connectors \
