@@ -92,6 +92,20 @@ services:
     networks:
       - local
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.21.0
+    container_name: meilisearch
+    restart: unless-stopped
+    ports:
+      - 7700:7700
+    environment:
+      MEILI_MASTER_KEY: "testkey"
+      MEILI_ENV: "development"
+    volumes:
+      - meilisearch:/meili_data
+    networks:
+      - local
+
   adminer:
     image: adminer:latest
     container_name: adminer
@@ -104,6 +118,7 @@ volumes:
   kafka:
   mysql:
   debezium:
+  meilisearch:
 networks:
   local:
     driver: bridge

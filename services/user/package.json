@@ -1,0 +1,17 @@
+{
+  "name": "user",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run main.ts --watch",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "1",
+    "typescript": "5"
+  },
+  "dependencies": {
+    "elysia": "1",
+    "mysql2": "^3.14.5"
+  }
+}
+
