@@ -3,7 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "turbo dev"
+    "dev": "turbo run run",
+    "build:relay": "cd services/relay && go build -o dist/relay"
   },
   "workspaces": [
     "services/*"
